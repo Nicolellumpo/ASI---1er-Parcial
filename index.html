@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASI — Análisis de Sistemas · Guía de Estudio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+  :root{--bg:#0f1117;--surface:#181c26;--surface2:#1f2535;--border:#2a3148;--accent:#4f8ef7;--accent2:#a78bfa;--accent3:#34d399;--accent4:#f59e0b;--danger:#f87171;--text:#e2e8f0;--muted:#8892a4;--tag-bg:#1e2a3a;--correct:#1a3a2a;--correct-border:#34d399;--wrong:#3a1a1a;--wrong-border:#f87171;}
+  .light{--bg:#f8f9fc;--surface:#ffffff;--surface2:#f1f3f8;--border:#dde1ea;--accent:#2563eb;--accent2:#7c3aed;--accent3:#059669;--accent4:#d97706;--danger:#dc2626;--text:#1e2130;--muted:#6b7280;--tag-bg:#e8edf8;--correct:#d1fae5;--correct-border:#059669;--wrong:#fee2e2;--wrong-border:#dc2626;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s;font-size:15px;line-height:1.65;}
+  .topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;}
+  .logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;color:var(--accent);letter-spacing:-.5px;}
+  .logo span{color:var(--muted);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .theme-select{appearance:none;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 30px 5px 10px;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+  .score-badge{background:var(--tag-bg);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--accent3);font-weight:600;}
+  .layout{display:flex;min-height:calc(100vh - 54px);}
+  .sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
+  .sidebar-section{padding:6px 16px 2px;font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin-top:10px;}
+  .sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;cursor:pointer;border-left:2px solid transparent;color:var(--muted);transition:all .15s;user-select:none;}
+  .sidebar-item:hover{background:var(--surface2);color:var(--text);}
+  .sidebar-item.active{border-left-color:var(--accent);color:var(--accent);background:var(--tag-bg);font-weight:600;}
+  .sidebar-icon{font-size:15px;width:18px;text-align:center;}
+  main{flex:1;padding:32px 40px;max-width:940px;}
+  .section{display:none;}
+  .section.active{display:block;}
+  .section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+  .section-icon{font-size:32px;line-height:1;}
+  .section-title{font-size:22px;font-weight:700;letter-spacing:-.4px;}
+  .section-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+  .card-title{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+  .theory-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+  .def-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;}
+  .def-card .term{font-weight:700;font-size:14px;color:var(--accent);margin-bottom:4px;}
+  .def-card .def{font-size:13px;color:var(--muted);}
+  .def-card .def strong{color:var(--text);}
+  .timeline{position:relative;padding-left:28px;}
+  .timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--border);}
+  .tl-item{position:relative;margin-bottom:20px;}
+  .tl-dot{position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+  .tl-head{font-size:14px;font-weight:700;margin-bottom:3px;}
+  .tl-body{font-size:13px;color:var(--muted);}
+  .tl-body strong{color:var(--text);}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px;margin:2px;}
+  .badge-blue{background:#1e3a5f;color:#60a5fa;}.badge-purple{background:#2d1b5e;color:#c4b5fd;}.badge-green{background:#1a3a2a;color:#6ee7b7;}.badge-yellow{background:#3a2a0a;color:#fcd34d;}.badge-red{background:#3a1a1a;color:#fca5a5;}.badge-orange{background:#3a2010;color:#fdba74;}
+  .light .badge-blue{background:#dbeafe;color:#1d4ed8;}.light .badge-purple{background:#ede9fe;color:#6d28d9;}.light .badge-green{background:#d1fae5;color:#065f46;}.light .badge-yellow{background:#fef3c7;color:#92400e;}.light .badge-red{background:#fee2e2;color:#991b1b;}.light .badge-orange{background:#ffedd5;color:#9a3412;}
+  .accord{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+  .accord-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;background:var(--surface);font-size:14px;font-weight:600;transition:background .15s;user-select:none;}
+  .accord-head:hover{background:var(--surface2);}
+  .accord-arrow{font-size:12px;color:var(--muted);transition:transform .2s;}
+  .accord.open .accord-arrow{transform:rotate(180deg);}
+  .accord-body{display:none;padding:14px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:13px;color:var(--muted);}
+  .accord-body strong{color:var(--text);}
+  .accord.open .accord-body{display:block;}
+  .accord-body ul{padding-left:18px;margin-top:6px;}
+  .accord-body li{margin-bottom:4px;}
+  .quiz-question{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+  .quiz-q-text{font-size:15px;font-weight:600;margin-bottom:14px;}
+  .quiz-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);margin-bottom:6px;font-weight:600;}
+  .quiz-options{display:flex;flex-direction:column;gap:8px;}
+  .quiz-opt{padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;transition:all .15s;display:flex;align-items:flex-start;gap:10px;}
+  .quiz-opt:hover{border-color:var(--accent);}
+  .quiz-opt.selected-correct{background:var(--correct);border-color:var(--correct-border);}
+  .quiz-opt.selected-wrong{background:var(--wrong);border-color:var(--wrong-border);}
+  .quiz-opt.reveal-correct{background:var(--correct);border-color:var(--correct-border);opacity:.7;}
+  .quiz-opt.disabled{cursor:default;pointer-events:none;}
+  .quiz-letter{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--muted);min-width:16px;padding-top:1px;}
+  .quiz-feedback{margin-top:10px;padding:10px 14px;border-radius:7px;font-size:13px;display:none;}
+  .quiz-feedback.visible{display:block;}
+  .quiz-feedback.ok{background:var(--correct);border:1px solid var(--correct-border);}
+  .quiz-feedback.fail{background:var(--wrong);border:1px solid var(--wrong-border);}
+  .vf-question{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
+  .vf-text{font-size:14px;margin-bottom:12px;}
+  .vf-btns{display:flex;gap:8px;}
+  .vf-btn{padding:7px 20px;border-radius:6px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;transition:all .15s;}
+  .vf-v{background:var(--surface2);color:var(--accent3);border:1px solid var(--border);}
+  .vf-f{background:var(--surface2);color:var(--danger);border:1px solid var(--border);}
+  .vf-btn:hover{opacity:.85;transform:scale(1.02);}
+  .vf-result{margin-top:10px;padding:10px 14px;border-radius:7px;font-size:13px;display:none;}
+  .vf-result.show{display:block;}
+  .vf-result.ok{background:var(--correct);border:1px solid var(--correct-border);}
+  .vf-result.fail{background:var(--wrong);border:1px solid var(--wrong-border);}
+  .btn-quiz-reset{padding:9px 20px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;font-weight:600;transition:all .15s;margin-top:4px;}
+  .btn-quiz-reset:hover{background:var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0;}
+  th{background:var(--surface2);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:8px 12px;text-align:left;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  td strong{color:var(--text);}
+  tr:hover td{background:var(--surface2);}
+  .formula{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:12px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent3);margin:10px 0;}
+  .formula span{color:var(--muted);}
+  .info-box{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;}
+  .info-box.tip{background:#1e2f4a;border:1px solid #2a5a8a;color:#93c5fd;}
+  .info-box.warn{background:#3a2a10;border:1px solid #8a6a2a;color:#fcd34d;}
+  .light .info-box.tip{background:#dbeafe;border-color:#93c5fd;color:#1e40af;}
+  .light .info-box.warn{background:#fef3c7;border-color:#f59e0b;color:#92400e;}
+  .info-box-icon{font-size:16px;flex-shrink:0;}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+  .progress-bar-wrap{background:var(--surface2);border-radius:20px;height:6px;margin:6px 0 12px;}
+  .progress-bar-fill{height:100%;border-radius:20px;background:var(--accent3);transition:width .4s;}
+  .flashcard-wrap{perspective:1000px;max-width:580px;margin:0 auto 20px;}
+  .flashcard{position:relative;height:210px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);cursor:pointer;}
+  .flashcard.flipped{transform:rotateY(180deg);}
+  .fc-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;border:1px solid var(--border);}
+  .fc-front{background:var(--surface);font-size:16px;font-weight:600;}
+  .fc-back{background:var(--surface2);transform:rotateY(180deg);font-size:13px;color:var(--muted);}
+  .fc-hint{font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
+  .fc-nav{display:flex;align-items:center;justify-content:space-between;max-width:580px;margin:0 auto;}
+  .fc-nav-btn{padding:8px 18px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:inherit;font-size:13px;transition:all .15s;}
+  .fc-nav-btn:hover{background:var(--border);}
+  .fc-counter{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .error-scenario{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+  .error-enunciado{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.7;}
+  .error-enunciado strong{color:var(--text);}
+  .btn-show-errors{padding:8px 18px;border-radius:7px;background:var(--tag-bg);border:1px solid var(--accent);color:var(--accent);cursor:pointer;font-size:13px;font-family:inherit;font-weight:600;transition:all .15s;}
+  .btn-show-errors:hover{background:var(--accent);color:#fff;}
+  .errors-list{display:none;margin-top:12px;}
+  .errors-list.show{display:block;}
+  .error-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .error-item:last-child{border-bottom:none;}
+  .error-num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--danger);min-width:22px;}
+  .proc-exercise{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+  .proc-text{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
+  .proc-text strong{color:var(--text);}
+  .proc-options{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .proc-opt{padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;transition:all .15s;}
+  .proc-opt:hover{border-color:var(--accent2);}
+  .proc-opt.correct{background:var(--correct);border-color:var(--correct-border);}
+  .proc-opt.wrong{background:var(--wrong);border-color:var(--wrong-border);}
+  .proc-opt.disabled{cursor:default;pointer-events:none;}
+  .proc-fb{padding:10px 14px;border-radius:7px;font-size:13px;display:none;margin-top:8px;}
+  .proc-fb.show{display:block;}
+  .proc-fb.ok{background:var(--correct);border:1px solid var(--correct-border);}
+  .proc-fb.fail{background:var(--wrong);border:1px solid var(--wrong-border);}
+  @media(max-width:700px){.theory-grid,.two-col{grid-template-columns:1fr;}main{padding:20px 16px;}.sidebar{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">ASI<span>.study</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="score-badge" id="globalScore">✓ 0 / 0</div>
+    <select class="theme-select" onchange="setTheme(this.value)">
+      <option value="dark">🌙 Oscuro</option>
+      <option value="light">☀️ Claro</option>
+    </select>
+  </div>
+</div>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-section">Teoría</div>
+  <div class="sidebar-item active" onclick="nav(this,'sistemas')"><span class="sidebar-icon">🔬</span> Sistemas</div>
+  <div class="sidebar-item" onclick="nav(this,'metodologia')"><span class="sidebar-icon">📋</span> Metodología</div>
+  <div class="sidebar-item" onclick="nav(this,'ciclos')"><span class="sidebar-icon">🔄</span> Ciclos de Vida</div>
+  <div class="sidebar-item" onclick="nav(this,'agil')"><span class="sidebar-icon">⚡</span> Ágil & Scrum</div>
+  <div class="sidebar-item" onclick="nav(this,'planificacion')"><span class="sidebar-icon">📊</span> Planificación</div>
+  <div class="sidebar-item" onclick="nav(this,'reconocimiento')"><span class="sidebar-icon">🔍</span> Reconocimiento</div>
+  <div class="sidebar-item" onclick="nav(this,'tecnicas')"><span class="sidebar-icon">🎙️</span> Técnicas de Obtención</div>
+  <div class="sidebar-item" onclick="nav(this,'requerimientos')"><span class="sidebar-icon">📝</span> Requerimientos</div>
+  <div class="sidebar-item" onclick="nav(this,'historiasusario')"><span class="sidebar-icon">🧑‍💻</span> Historias de Usuario</div>
+  <div class="sidebar-item" onclick="nav(this,'casosuso')"><span class="sidebar-icon">👤</span> Casos de Uso</div>
+  <div class="sidebar-item" onclick="nav(this,'procesos')"><span class="sidebar-icon">⚙️</span> Proc. de Negocio</div>
+  <div class="sidebar-section">Práctica</div>
+  <div class="sidebar-item" onclick="nav(this,'vfquiz')"><span class="sidebar-icon">✅</span> Quiz V/F</div>
+  <div class="sidebar-item" onclick="nav(this,'multiplechoice')"><span class="sidebar-icon">🎯</span> Multiple Choice</div>
+  <div class="sidebar-item" onclick="nav(this,'erroresCU')"><span class="sidebar-icon">🐛</span> Errores en CU</div>
+  <div class="sidebar-item" onclick="nav(this,'procPractica')"><span class="sidebar-icon">🏢</span> Práctica Procesos</div>
+  <div class="sidebar-item" onclick="nav(this,'flashcards')"><span class="sidebar-icon">🃏</span> Flashcards</div>
+</nav>
+
+<main>
+
+<div class="section active" id="sec-sistemas">
+  <div class="section-header"><div class="section-icon">🔬</div><div><div class="section-title">Conceptos de Sistemas</div><div class="section-sub">Teoría General de Sistemas · Propiedades · Subsistemas</div></div></div>
+  <div class="theory-grid">
+    <div class="def-card"><div class="term">Sistema</div><div class="def">Conjunto organizado de cosas relacionadas que forman un todo complejo con <strong>objetivo común</strong>. Recibe estímulos y genera respuestas.</div></div>
+    <div class="def-card"><div class="term">Subsistema / Macrosistema</div><div class="def">Subsistema: sistema de menor jerarquía. El conjunto que contiene varios subsistemas es el <strong>macrosistema</strong>.</div></div>
+    <div class="def-card"><div class="term">Dato</div><div class="def">Medición <strong>objetiva</strong> de la realidad. No depende del interés del observador.</div></div>
+    <div class="def-card"><div class="term">Información</div><div class="def">Dato + conocimiento en contexto. Es <strong>subjetiva</strong>: depende del receptor y su necesidad.</div></div>
+    <div class="def-card"><div class="term">Entropía</div><div class="def">Desgaste del sistema por el <strong>transcurso del tiempo o funcionamiento</strong>. No implica uso de tecnología.</div></div>
+    <div class="def-card"><div class="term">Homeostasis</div><div class="def">Nivel de adaptación permanente del sistema al contexto. Tendencia a la <strong>supervivencia dinámica</strong>.</div></div>
+    <div class="def-card"><div class="term">Permeabilidad</div><div class="def">Mide la interacción con el medio. <strong>Alta = sistema abierto</strong>. Casi nula = sistema cerrado.</div></div>
+    <div class="def-card"><div class="term">Sinergia</div><div class="def">El todo es <strong>mayor que la suma de sus partes</strong>.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Relaciones entre subsistemas</div>
+    <table><tr><th>Tipo</th><th>Descripción</th></tr>
+      <tr><td><strong>Simbiótica</strong></td><td>Los sistemas conectados <strong>no pueden funcionar solos</strong>.</td></tr>
+      <tr><td><strong>Sinérgica</strong></td><td>No es necesaria para funcionar, pero <strong>mejora sustancialmente</strong> el desempeño.</td></tr>
+      <tr><td><strong>Superflua</strong></td><td>Repite otras relaciones. Aumenta la probabilidad de que el sistema funcione <strong>todo el tiempo</strong>.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Caja Blanca vs Caja Negra</div>
+    <div class="two-col">
+      <div class="def-card"><div class="term">⬜ Caja Blanca</div><div class="def">Proceso <strong>conocido y diseñado</strong>.</div></div>
+      <div class="def-card"><div class="term">⬛ Caja Negra</div><div class="def">Proceso <strong>desconocido o complejo</strong>. Solo se conocen entradas y salidas.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Subsistemas de la empresa</div>
+    <div class="theory-grid">
+      <div class="def-card"><div class="term">Psicosocial</div><div class="def">Individuos, grupos, conductas, motivaciones.</div></div>
+      <div class="def-card"><div class="term">Técnico</div><div class="def">Conocimientos y técnicas para transformar insumos en productos.</div></div>
+      <div class="def-card"><div class="term">Administrativo</div><div class="def">Relaciona la org con su medio, establece objetivos y control.</div></div>
+    </div>
+  </div>
+  <div class="info-box warn"><span class="info-box-icon">⚠️</span><span><strong>Trampa de parcial:</strong> Un sistema de información <em>no necesita</em> tecnología informática. La entropía es el desgaste por el tiempo/funcionamiento.</span></div>
+</div>
+
+<div class="section" id="sec-metodologia">
+  <div class="section-header"><div class="section-icon">📋</div><div><div class="section-title">Metodología de Sistemas</div><div class="section-sub">Etapas · Criterios de Factibilidad</div></div></div>
+  <div class="info-box tip"><span class="info-box-icon">💡</span><span>El <strong>Análisis</strong> va de Reconocimiento a Análisis de Requisitos. La <strong>Gestión de Proyectos</strong> corre en paralelo desde Reconocimiento hasta Instalación.</span></div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">1. Reconocimiento</div><div class="tl-body">Primera aproximación. Con <strong>cargos de alto nivel</strong>. Corta duración. Culmina con informe.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">2. Relevamiento</div><div class="tl-body">Conocimiento <strong>exhaustivo</strong>. Revisa circuitos y procedimientos administrativos.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">3. Diagnóstico</div><div class="tl-body">Determina <strong>causas</strong> y presenta alternativas. El cliente <strong>debe concordar</strong>.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">4. Estudio de Factibilidad</div><div class="tl-body">Máx. 3 alternativas. Criterios: <span class="badge badge-blue">Económico</span><span class="badge badge-purple">Financiero</span><span class="badge badge-green">Técnico</span><span class="badge badge-yellow">Operativo</span><span class="badge badge-red">Político</span><span class="badge badge-orange">Legal</span></div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">5. Análisis de Requerimientos</div><div class="tl-body">Solo en desarrollo. Especifica qué debe hacer el sistema.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">6. Diseño</div><div class="tl-body">Transforma el análisis en estructuras de datos e interfaces.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">7. Desarrollo</div><div class="tl-body">Manuales, programas, capacitación inicial.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">8. Pruebas</div><div class="tl-body">Revisiones formales, pruebas de integración y de usuario.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">9. Instalación</div><div class="tl-body">Implementa el sistema. Incluye <strong>migración de datos</strong>.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">10. Mantenimiento</div><div class="tl-body">Corrección de errores y nuevos requerimientos.</div></div>
+    <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">11. Sustitución</div><div class="tl-body">Todo sistema eventualmente es reemplazado.</div></div>
+  </div>
+</div>
+
+<div class="section" id="sec-ciclos">
+  <div class="section-header"><div class="section-icon">🔄</div><div><div class="section-title">Ciclos de Vida</div><div class="section-sub">Cascada · Prototipo · Espiral · Iterativo Incremental</div></div></div>
+  <table><tr><th>Ciclo</th><th>Cuándo usar</th><th>Características</th></tr>
+    <tr><td><strong>Cascada</strong></td><td>Reqs <strong>claros y estables</strong>. Equipo experimentado.</td><td>Secuencial. Sin entregables parciales.</td></tr>
+    <tr><td><strong>Prototipo</strong></td><td>Reqs <strong>no claros</strong>. Alta disponibilidad del cliente.</td><td>Prototipos validados progresivamente.</td></tr>
+    <tr><td><strong>Espiral</strong></td><td>Dominio desconocido. Reqs muy inestables. Alto riesgo.</td><td>Evalúa riesgos permanentemente. Costoso.</td></tr>
+    <tr><td><strong>Iterativo Incremental Ágil</strong></td><td>Entregables con valor. Cliente involucrado.</td><td>Entregas frecuentes (~15 días).</td></tr>
+  </table>
+  <div class="info-box warn"><span class="info-box-icon">⚠️</span><span>El espiral se usa cuando el incumplimiento de tiempo/alcance/costo <em>puede hacer fracasar el proyecto</em>, no solo "hay riesgo".</span></div>
+</div>
+
+<div class="section" id="sec-agil">
+  <div class="section-header"><div class="section-icon">⚡</div><div><div class="section-title">Metodologías Ágiles & Scrum</div><div class="section-sub">Valores · Scrum · Cynefin · Mitos</div></div></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'agil-tab','agil-valores')">Valores</button>
+    <button class="tab-btn" onclick="switchTab(this,'agil-tab','agil-scrum')">Scrum</button>
+    <button class="tab-btn" onclick="switchTab(this,'agil-tab','agil-cynefin')">Cynefin</button>
+    <button class="tab-btn" onclick="switchTab(this,'agil-tab','agil-mitos')">Mitos</button>
+  </div>
+  <div id="agil-tab">
+    <div class="tab-content active" id="agil-valores">
+      <div class="card"><div class="card-title">4 Valores del Manifiesto Ágil</div>
+        <div class="theory-grid">
+          <div class="def-card"><div class="term">Individuos e interacciones</div><div class="def">Sobre procesos y herramientas</div></div>
+          <div class="def-card"><div class="term">Software funcionando</div><div class="def">Sobre documentación extensiva</div></div>
+          <div class="def-card"><div class="term">Colaboración con el cliente</div><div class="def">Sobre negociación contractual</div></div>
+          <div class="def-card"><div class="term">Respuesta ante el cambio</div><div class="def">Sobre seguir un plan</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="agil-scrum">
+      <div class="card"><div class="card-title">Roles</div>
+        <div class="theory-grid">
+          <div class="def-card"><div class="term">Product Owner</div><div class="def">Maximiza el valor. Prioriza el Backlog. Elabora HU.</div></div>
+          <div class="def-card"><div class="term">Scrum Master</div><div class="def">Asegura el proceso. Elimina obstáculos.</div></div>
+          <div class="def-card"><div class="term">Development Team</div><div class="def">3 a 9 personas. Autogestionado.</div></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Ceremonias</div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">Planning <span class="accord-arrow">▼</span></div><div class="accord-body">Cada ~15 días. Planifica el próximo Sprint.</div></div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">Daily <span class="accord-arrow">▼</span></div><div class="accord-body">15 min. Comunica avances y consultas.</div></div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">Review <span class="accord-arrow">▼</span></div><div class="accord-body">Muestra al cliente el incremento del Sprint.</div></div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">Retrospective <span class="accord-arrow">▼</span></div><div class="accord-body">Introspección del equipo para mejorar el proceso.</div></div>
+      </div>
+      <div class="info-box warn"><span class="info-box-icon">⚠️</span><span>Al final del Sprint NO se entregan todos los módulos: se entrega un <strong>incremento con valor</strong>.</span></div>
+    </div>
+    <div class="tab-content" id="agil-cynefin">
+      <div class="theory-grid">
+        <div class="def-card"><div class="term">🟢 Simple</div><div class="def">Solución clara y probada.</div></div>
+        <div class="def-card"><div class="term">🔵 Complicado</div><div class="def">Múltiples soluciones correctas. Requiere expertos.</div></div>
+        <div class="def-card"><div class="term">🟣 Complejo</div><div class="def">Resultados impredecibles. <strong>Ideal para ágil.</strong></div></div>
+        <div class="def-card"><div class="term">🔴 Caótico</div><div class="def">Crisis. Actuar de inmediato.</div></div>
+      </div>
+    </div>
+    <div class="tab-content" id="agil-mitos">
+      <div class="card"><div class="card-title">Mitos sobre la Agilidad</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px">
+          <span class="badge badge-red">❌ Agilidad = Anarquía</span><span class="badge badge-red">❌ Agilidad = Scrum</span><span class="badge badge-red">❌ No hay documentación</span><span class="badge badge-red">❌ No existe planificación</span><span class="badge badge-red">❌ Es trabajar más rápido</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section" id="sec-planificacion">
+  <div class="section-header"><div class="section-icon">📊</div><div><div class="section-title">Planificación · PERT-CPM · Gantt</div><div class="section-sub">Camino crítico · Errores comunes al diagramar</div></div></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'plan-tab','plan-conceptos')">Conceptos</button>
+    <button class="tab-btn" onclick="switchTab(this,'plan-tab','plan-formulas')">Fórmulas</button>
+    <button class="tab-btn" onclick="switchTab(this,'plan-tab','plan-gantt')">Gantt vs PERT</button>
+    <button class="tab-btn" onclick="switchTab(this,'plan-tab','plan-errores')">⚠️ Errores Comunes</button>
+    <button class="tab-btn" onclick="switchTab(this,'plan-tab','plan-ej')">Ejemplo Resuelto</button>
+  </div>
+  <div id="plan-tab">
+    <div class="tab-content active" id="plan-conceptos">
+      <div class="theory-grid">
+        <div class="def-card"><div class="term">Fecha Temprana (FTe)</div><div class="def">Se calcula <strong>izq→der</strong>, eligiendo el <strong>mayor valor</strong>.</div></div>
+        <div class="def-card"><div class="term">Fecha Tardía (FTa)</div><div class="def">Se calcula <strong>der→izq</strong>, eligiendo el <strong>menor valor</strong>. FTa(final)=FTe(final).</div></div>
+        <div class="def-card"><div class="term">Intervalo de Flotamiento (IF)</div><div class="def">Margen del <em>nodo</em>. IF=FTa(i)−FTe(i).</div></div>
+        <div class="def-card"><div class="term">Margen Libre (ML)</div><div class="def">Demora sin afectar el <em>comienzo</em> de las siguientes tareas.</div></div>
+        <div class="def-card"><div class="term">Margen Total (MT)</div><div class="def">Demora máxima sin afectar el <em>plazo total</em>. Críticas: <strong>MT=0</strong>.</div></div>
+        <div class="def-card"><div class="term">Tarea Ficticia</div><div class="def">No consume tiempo ni recursos. Duración=0. Flecha punteada.</div></div>
+        <div class="def-card"><div class="term">Camino Crítico</div><div class="def">Puede haber <strong>varios</strong>, todos de la misma longitud.</div></div>
+        <div class="def-card"><div class="term">Tarea Crítica</div><div class="def">MT=0 <strong>Y</strong> está entre nodos críticos.</div></div>
+      </div>
+      <div class="info-box tip"><span class="info-box-icon">💡</span><span><strong>CPM = Determinístico</strong>. <strong>PERT = Probabilístico</strong> (3 estimaciones).</span></div>
+    </div>
+    <div class="tab-content" id="plan-formulas">
+      <div class="formula"><span>Intervalo de Flotamiento:</span> IF(i) = FTa(i) − FTe(i)</div>
+      <div class="formula"><span>Margen Total:</span> MT(ij) = FTa(j) − FTe(i) − t(ij)</div>
+      <div class="formula"><span>Margen Libre:</span> ML(ij) = FTe(j) − FTe(i) − t(ij)</div>
+      <div class="formula"><span>FTe progresivo (→):</span> FTe(j) = MAX [ FTe(i) + t(ij) ]</div>
+      <div class="formula"><span>FTa regresivo (←):</span> FTa(i) = MIN [ FTa(j) − t(ij) ]</div>
+    </div>
+    <div class="tab-content" id="plan-gantt">
+      <table><tr><th></th><th>Gantt</th><th>PERT/CPM</th></tr>
+        <tr><td><strong>Para qué</strong></td><td>Calendarizar, solapamiento</td><td>Dependencias, camino crítico</td></tr>
+        <tr><td><strong>No muestra</strong></td><td>Dependencias entre tareas</td><td>Vista temporal/calendario</td></tr>
+      </table>
+      <div class="info-box tip"><span class="info-box-icon">💡</span><span>Gantt y PERT/CPM son <strong>complementarios</strong>.</span></div>
+    </div>
+    <div class="tab-content" id="plan-errores">
+      <div class="card">
+        <div class="card-title">⚠️ Errores Comunes al Diagramar en PERT-CPM</div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 1 — Dos tareas con mismo nodo inicio y fin <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Dos tareas distintas que comparten exactamente el mismo nodo de inicio y de fin generan un grafo ambiguo.<br><br><strong>Solución:</strong> Usar una <strong>tarea ficticia</strong> para diferenciarlas, agregando un nodo intermedio.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 2 — Diagramar una tarea "hacia atrás" <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> La red siempre se lee de izquierda a derecha. Una flecha que retrocede rompe la lógica.<br><br><strong>Solución:</strong> Reorganizar los nodos; si una tarea parece retroceder, la dependencia está mal definida en la tabla.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 3 — Más de un nodo inicial o final <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Todo grafo PERT debe tener un único nodo de inicio y uno de fin.<br><br><strong>Solución:</strong> Unificar inicios y finales con tareas ficticias si hace falta.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 4 — Crear dependencias falsas al usar ficticias <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Si C depende de A y B pero D solo depende de A, sin una ficticia bien puesta se crea una dependencia falsa entre D y B.<br><br><strong>Solución:</strong> Usar la ficticia para separar correctamente las precedencias.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 5 — Confundir "entre nodos críticos" con "tarea crítica" <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Asumir que toda tarea entre dos nodos críticos es automáticamente crítica.<br><br><strong>Solución:</strong> Una tarea es crítica SOLO SI tiene <strong>MT=0</strong>. Siempre calcularlo.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 6 — En FTe elegir el menor en vez del mayor <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Con varios predecesores, elegir el valor menor en FTe.<br><br><strong>Solución:</strong> En FTe se elige siempre el <strong>MAYOR</strong>. En FTa se elige el MENOR.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 7 — Nodo final con FTa distinto de FTe <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Empezar el cálculo regresivo con un valor distinto al FTe del nodo final.<br><br><strong>Solución:</strong> El nodo final siempre tiene <strong>FTa = FTe</strong>.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 8 — Creer que adelantar una tarea siempre adelanta el proyecto <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Asumir que adelantar cualquier tarea crítica adelanta el proyecto.<br><br><strong>Solución:</strong> Solo ocurre si <strong>no hay otro camino crítico</strong> con la misma duración.</div>
+        </div>
+        <div class="accord" onclick="toggleAccord(this)"><div class="accord-head">❌ 9 — Asignarle duración a una tarea ficticia <span class="accord-arrow">▼</span></div>
+          <div class="accord-body"><strong>Problema:</strong> Darle tiempo o recursos a una tarea ficticia.<br><br><strong>Solución:</strong> Las ficticias tienen duración=0, sin recursos, flecha punteada.</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="plan-ej">
+      <div class="card">
+        <div class="card-title">Ejemplo Resuelto (TP4)</div>
+        <table><tr><th>Tarea</th><th>MT = FTa(j) − FTe(i) − t</th><th>¿Crítica?</th></tr>
+          <tr><td>A</td><td>5−0−5=<strong>0</strong></td><td>✅</td></tr>
+          <tr><td>B</td><td>6−0−3=3</td><td>❌</td></tr>
+          <tr><td>C</td><td>6−5−1=<strong>0</strong></td><td>✅</td></tr>
+          <tr><td>G</td><td>11−5−6=<strong>0</strong></td><td>✅</td></tr>
+          <tr><td>I</td><td>12−11−2=<strong>0</strong></td><td>✅</td></tr>
+        </table>
+        <div class="formula"><span>Camino crítico:</span> A → C → G → I &nbsp;|&nbsp; <span>Duración total:</span> 12 días</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-reconocimiento">
+  <div class="section-header"><div class="section-icon">🔍</div><div><div class="section-title">Reconocimiento</div><div class="section-sub">Informe · Estructura · Sponsor vs Stakeholder</div></div></div>
+  <div class="card">
+    <div class="card-title">Estructura del Informe de Reconocimiento</div>
+    <div class="timeline" style="margin-top:10px">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Introducción</div><div class="tl-body">Carta de presentación.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Objetivo de la empresa</div><div class="tl-body">Descripción general (misión, visión).</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Objetivo de mandato</div><div class="tl-body">Por qué nos convocaron.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Sponsor</div><div class="tl-body">Quien <strong>empuja y financia</strong> el proyecto.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Problemas y necesidades</div><div class="tl-body">Deben relacionarse con el <strong>objetivo de mandato</strong>.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Estructura de la organización</div><div class="tl-body">Organigrama.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Conclusión</div><div class="tl-body">Áreas a relevar, justificadas.</div></div>
+    </div>
+  </div>
+  <div class="info-box warn"><span class="info-box-icon">⚠️</span><span>El informe de Rec es de <em>documentación</em>, no de obtención. Los problemas se relacionan con el <em>objetivo de mandato</em>.</span></div>
+</div>
+
+<div class="section" id="sec-tecnicas">
+  <div class="section-header"><div class="section-icon">🎙️</div><div><div class="section-title">Técnicas de Obtención de Información</div><div class="section-sub">Entrevista · Cuestionario · Observación</div></div></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'tec-tab','tec-entrevista')">Entrevista</button>
+    <button class="tab-btn" onclick="switchTab(this,'tec-tab','tec-cuestionario')">Cuestionario</button>
+    <button class="tab-btn" onclick="switchTab(this,'tec-tab','tec-observacion')">Observación</button>
+    <button class="tab-btn" onclick="switchTab(this,'tec-tab','tec-comparativa')">Comparativa</button>
+  </div>
+  <div id="tec-tab">
+    <div class="tab-content active" id="tec-entrevista">
+      <div class="card">
+        <div class="card-title">Entrevista</div>
+        <p style="font-size:14px;margin-bottom:12px;color:var(--muted)">Usada en <strong>Reconocimiento</strong> y <strong>Relevamiento</strong>.</p>
+        <div class="two-col">
+          <div class="def-card"><div class="term">Alta flexibilidad</div><div class="def">Abiertas. Útil en <strong>Reconocimiento</strong>.</div></div>
+          <div class="def-card"><div class="term">Baja flexibilidad</div><div class="def">Cerradas. Útil en <strong>Relevamiento</strong>.</div></div>
+        </div>
+        <hr>
+        <table><tr><th>Tipo</th><th>Ventajas</th><th>Desventajas</th></tr>
+          <tr><td><strong>Abiertas</strong></td><td>Exploración libre, espontáneo</td><td>Análisis lleva más tiempo</td></tr>
+          <tr><td><strong>Cerradas</strong></td><td>Análisis sencillo y rápido</td><td>No espontáneas</td></tr>
+        </table>
+        <hr>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="def-card" style="flex:1;min-width:150px"><div class="term">🔻 Embudo</div><div class="def">Abiertas → Cerradas.</div></div>
+          <div class="def-card" style="flex:1;min-width:150px"><div class="term">🔺 Pirámide</div><div class="def">Cerradas → Abiertas.</div></div>
+          <div class="def-card" style="flex:1;min-width:150px"><div class="term">💎 Rombo</div><div class="def">Cerradas → Abiertas → Cerradas.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="tec-cuestionario">
+      <div class="card">
+        <div class="card-title">Cuestionario</div>
+        <p style="font-size:14px;margin-bottom:12px;color:var(--muted)">Recolección masiva cuando hay dificultad de coordinación.</p>
+        <div class="info-box warn" style="margin:0"><span class="info-box-icon">⚠️</span><span>
+          <ul style="padding-left:18px;margin:4px 0">
+            <li>Objetivo claro escrito al inicio</li>
+            <li>Indicar cómo responder</li>
+            <li>Agrupar preguntas por temática</li>
+            <li>Indicar obligatoriedad de preguntas</li>
+            <li>Mantener el mismo tono</li>
+          </ul>
+        </span></div>
+      </div>
+    </div>
+    <div class="tab-content" id="tec-observacion">
+      <div class="card">
+        <div class="card-title">Observación</div>
+        <div class="two-col">
+          <div class="def-card"><div class="term">No participante</div><div class="def">Se mantiene neutral, sin involucrarse.</div></div>
+          <div class="def-card"><div class="term">Participante</div><div class="def">Se integra al entorno del grupo.</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="def-card"><div class="term">Individual</div><div class="def">Una sola persona. Más subjetividad.</div></div>
+          <div class="def-card"><div class="term">En equipo</div><div class="def">Varias personas. Menos subjetividad.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="tec-comparativa">
+      <table><tr><th>Técnica</th><th>Etapa</th><th>Cuándo preferirla</th></tr>
+        <tr><td><strong>Entrevista</strong></td><td>Reconocimiento y Relevamiento</td><td>Profundidad, pocos entrevistados.</td></tr>
+        <tr><td><strong>Cuestionario</strong></td><td>Reconocimiento y Relevamiento</td><td>Muchos encuestados dispersos.</td></tr>
+        <tr><td><strong>Observación</strong></td><td>Relevamiento</td><td>Verificar lo relevado.</td></tr>
+      </table>
+      <div class="info-box warn"><span class="info-box-icon">⚠️</span><span>Las preguntas cerradas NO son las más recomendables para el Reconocimiento.</span></div>
+    </div>
+  </div>
+</div>
+<div class="section" id="sec-requerimientos">
+  <div class="section-header"><div class="section-icon">📝</div><div><div class="section-title">Requerimientos</div><div class="section-sub">Funcionales · No Funcionales · Cadena</div></div></div>
+  <div class="card">
+    <div class="card-title">Tipos de Requerimientos de Sistema</div>
+    <div class="theory-grid">
+      <div class="def-card"><div class="term">Funcionales</div><div class="def">Describen <strong>qué debe hacer</strong> el sistema.</div></div>
+      <div class="def-card"><div class="term">No Funcionales — Calidad</div><div class="def"><strong>Mantenibilidad · Usabilidad · Performance · Disponibilidad · Seguridad</strong></div></div>
+      <div class="def-card"><div class="term">No Funcionales — Técnicos</div><div class="def">Restricciones de diseño e implementación.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Cadena de Requerimientos</div>
+    <div class="timeline" style="margin-top:8px">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">De Negocio</div><div class="tl-body">Reconocimiento y Relevamiento. Objetivos de alto nivel.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">De Usuario</div><div class="tl-body">Relevamiento. Necesidades del usuario.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Del Sistema</div><div class="tl-body">Análisis de requisitos. Especificaciones técnicas.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Características de un Buen Requerimiento</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px">
+      <span class="badge badge-green">✓ Completo</span><span class="badge badge-green">✓ No ambiguo</span><span class="badge badge-green">✓ Verificable</span><span class="badge badge-green">✓ Consistente</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-historiasusario">
+  <div class="section-header"><div class="section-icon">🧑‍💻</div><div><div class="section-title">Historias de Usuario</div><div class="section-sub">Formato · 3C · INVEST · Jerarquía Ágil</div></div></div>
+  <div class="card">
+    <div class="card-title">Formato</div>
+    <div class="formula"><span>Como</span> [rol/usuario] <span>quiero</span> [funcionalidad] <span>para</span> [beneficio/objetivo]</div>
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Ej: <em>"Como comprador, quiero pagar con transferencia, para poder hacerlo desde mi casa."</em></p>
+  </div>
+  <div class="card">
+    <div class="card-title">Las 3 C</div>
+    <div class="theory-grid">
+      <div class="def-card"><div class="term">Card</div><div class="def">Tan atómica que entra en una tarjeta.</div></div>
+      <div class="def-card"><div class="term">Conversation</div><div class="def"><strong>El analista pregunta, el PO/usuario responde.</strong></div></div>
+      <div class="def-card"><div class="term">Confirmation</div><div class="def">Criterios de aceptación.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Criterio INVEST</div>
+    <table><tr><th>Letra</th><th>Significa</th></tr>
+      <tr><td><strong>I</strong></td><td>Independent (Independiente)</td></tr>
+      <tr><td><strong>N</strong></td><td>Negotiable (Negociable)</td></tr>
+      <tr><td><strong>V</strong></td><td>Valuable (Valiosa)</td></tr>
+      <tr><td><strong>E</strong></td><td>Estimable</td></tr>
+      <tr><td><strong>S</strong></td><td>Small (Pequeña)</td></tr>
+      <tr><td><strong>T</strong></td><td>Testable (Testeable)</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Jerarquía de Requerimientos Ágiles</div>
+    <div class="timeline" style="margin-top:8px">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Strategic Theme (Iniciativa)</div><div class="tl-body">Objetivo estratégico amplio.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Epic (Épica)</div><div class="tl-body">Demasiado grande para un Sprint.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">Feature</div><div class="tl-body">Funcionalidad específica.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">User Story</div><div class="tl-body">Unidad mínima de valor.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">HU vs Requerimientos</div>
+    <table><tr><th></th><th>Historia de Usuario</th><th>Requerimiento</th></tr>
+      <tr><td><strong>Formato</strong></td><td>Narrativo, centrado en el usuario</td><td>Declarativo, centrado en el sistema</td></tr>
+      <tr><td><strong>Lenguaje</strong></td><td>Simple, no técnico</td><td>Técnico, formal</td></tr>
+      <tr><td><strong>Adaptabilidad</strong></td><td>Alta</td><td>Baja</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section" id="sec-casosuso">
+  <div class="section-header"><div class="section-icon">👤</div><div><div class="section-title">Casos de Uso</div><div class="section-sub">Actores · Include · Extend</div></div></div>
+  <div class="card">
+    <div class="card-title">Conceptos clave</div>
+    <div class="theory-grid">
+      <div class="def-card"><div class="term">Caso de Uso</div><div class="def">Secuencia de acciones para producir un resultado.</div></div>
+      <div class="def-card"><div class="term">Actor</div><div class="def">Elemento externo: persona, dispositivo u otro sistema.</div></div>
+      <div class="def-card"><div class="term">Escenario</div><div class="def">Camino concreto de un CU. De éxito y de excepción.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Relaciones</div>
+    <table><tr><th>Relación</th><th>Qué modela</th><th>Dirección</th></tr>
+      <tr><td><span class="badge badge-blue">«include»</span></td><td>Comportamiento <strong>obligatorio</strong>.</td><td>CU que incluye → CU incluido</td></tr>
+      <tr><td><span class="badge badge-purple">«extend»</span></td><td>Comportamiento <strong>opcional</strong>.</td><td>CU extensor → CU base</td></tr>
+      <tr><td><strong>Asociación</strong></td><td>Actor interactúa con el CU.</td><td>Sin dirección</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section" id="sec-procesos">
+  <div class="section-header"><div class="section-icon">⚙️</div><div><div class="section-title">Procesos de Negocio</div><div class="section-sub">Macroprocesos · Tipos · Fases</div></div></div>
+  <div class="card">
+    <div class="card-title">Tipos de Procesos</div>
+    <div class="theory-grid">
+      <div class="def-card"><div class="term">Estratégicos</div><div class="def">Dirección y largo plazo.</div></div>
+      <div class="def-card"><div class="term">Operativos</div><div class="def">Realización del producto/servicio.</div></div>
+      <div class="def-card"><div class="term">De Apoyo/Soporte</div><div class="def">Soporte a los operativos.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Fases de la Gestión por Procesos (son 4, no 5)</div>
+    <div class="info-box warn" style="margin-bottom:12px"><span class="info-box-icon">⚠️</span><span>Trampa: a veces listan 5 con "Definir macroprocesos" extra. Son <strong>4 fases</strong>.</span></div>
+    <div class="timeline" style="margin-top:8px">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">1. Identificar declaraciones</div><div class="tl-body">Misión, visión, alcance.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">2. Identificar macroprocesos</div><div class="tl-body">No tiene actividades propias.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">3. Identificar procesos</div><div class="tl-body">Nombre, tipo, área responsable.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-head">4. Detallar procesos</div><div class="tl-body">BPMN, cursogramas, tablas.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-vfquiz">
+  <div class="section-header"><div class="section-icon">✅</div><div><div class="section-title">Quiz Verdadero / Falso</div><div class="section-sub">Preguntas reales de parciales</div></div></div>
+  <button class="btn-quiz-reset" onclick="resetVF()">↺ Reiniciar Quiz</button>
+  <div style="height:12px"></div>
+  <div id="vf-container"></div>
+</div>
+
+<div class="section" id="sec-multiplechoice">
+  <div class="section-header"><div class="section-icon">🎯</div><div><div class="section-title">Multiple Choice</div><div class="section-sub">Autoevaluación y parciales</div></div></div>
+  <button class="btn-quiz-reset" onclick="resetMC()">↺ Reiniciar</button>
+  <div style="height:12px"></div>
+  <div id="mc-container"></div>
+</div>
+
+<div class="section" id="sec-erroresCU">
+  <div class="section-header"><div class="section-icon">🐛</div><div><div class="section-title">Detectá Errores en Casos de Uso</div><div class="section-sub">Leé el enunciado e identificá los errores</div></div></div>
+
+  <div class="error-scenario">
+    <div style="font-weight:700;font-size:15px;margin-bottom:10px">Caso 1 — Supermercado TAS</div>
+    <div class="error-enunciado"><strong>Enunciado:</strong> El cliente pasa productos por el escáner en una terminal de autoservicio. Puede ingresar tickets de descuento. La cajera cobra en caja manual rápida. Al cerrar el día genera un resumen. Diagrama: actores <em>Cliente</em> y <em>Cajera</em> — CU "Ingresar Productos", "Ingresar Tickets", "Finalizar Compra", "Cobrar", "Cerrar Caja", "Generar Resumen" — Cliente→Cobrar, Cliente y Cajera→Cerrar Caja, "Generar Resumen" «include»→"Cerrar Caja", "Ingresar Tickets" «include»→"Finalizar Compra".</div>
+    <button class="btn-show-errors" onclick="toggleErrors(this)">👁 Ver los errores</button>
+    <div class="errors-list">
+      <div class="error-item"><span class="error-num">1</span><span><strong>Cliente asociado a "Cobrar":</strong> El cliente no cobra, lo cobra la <strong>Cajera</strong>.</span></div>
+      <div class="error-item"><span class="error-num">2</span><span><strong>Cliente asociado a "Cerrar Caja":</strong> Solo la Cajera cierra la caja.</span></div>
+      <div class="error-item"><span class="error-num">3</span><span><strong>«include» invertido en "Ingresar Tickets":</strong> Debería ir desde "Finalizar Compra" y ser «extend» (es opcional).</span></div>
+      <div class="error-item"><span class="error-num">4</span><span><strong>«include» invertido en "Generar Resumen":</strong> Debería ir desde "Cerrar Caja" y ser «extend» (opcional).</span></div>
+      <div class="error-item"><span class="error-num">5</span><span><strong>Falta "Controlar validez de tarjeta":</strong> Solo ocurre si el pago es con tarjeta — «extend» desde "Cobrar".</span></div>
+    </div>
+  </div>
+
+  <div class="error-scenario">
+    <div style="font-weight:700;font-size:15px;margin-bottom:10px">Caso 2 — Sistema DNI</div>
+    <div class="error-enunciado"><strong>Enunciado:</strong> Ciudadanos renuevan el DNI online. Extranjeros validan su documento de origen. La persona elige turno. Supervisor de Delegación ve listado de turnos. Supervisor General ve renovaciones demoradas. Diagrama: «include» de "Iniciar Renovación"→"Validar Doc Extranjero" — Supervisor General asociado directo a "Ver Listado Delegación".</div>
+    <button class="btn-show-errors" onclick="toggleErrors(this)">👁 Ver los errores</button>
+    <div class="errors-list">
+      <div class="error-item"><span class="error-num">1</span><span><strong>«include» en "Validar Doc Extranjero":</strong> No siempre ocurre, solo si es extranjero. Debería ser <strong>«extend»</strong>.</span></div>
+      <div class="error-item"><span class="error-num">2</span><span><strong>Supervisor General con "Ver Listado Delegación":</strong> Ese CU es del Supervisor de Delegación, no del General.</span></div>
+      <div class="error-item"><span class="error-num">3</span><span><strong>Falta "Iniciar Sesión":</strong> Ambos supervisores ingresan con usuario y contraseña — debería haber «include» desde sus CU.</span></div>
+      <div class="error-item"><span class="error-num">4</span><span><strong>"Seleccionar Turno" no incluido en "Iniciar Renovación":</strong> Es parte del flujo de renovación, debería ser «include».</span></div>
+    </div>
+  </div>
+
+  <div class="error-scenario">
+    <div style="font-weight:700;font-size:15px;margin-bottom:10px">Caso 3 — Plataforma de Videojuegos</div>
+    <div class="error-enunciado"><strong>Enunciado:</strong> Jugadores inician sesión y juegan mini-juegos o desafíos. Creadores generan y publican juegos. Veedores expulsan jugadores sospechosos. Diagrama: "Jugar Mini-juego" «include»→"Jugar Desafío" — Veedor asociado a "Iniciar Sesión" — "Publicar Juego" «extend»→"Generar Videojuego".</div>
+    <button class="btn-show-errors" onclick="toggleErrors(this)">👁 Ver los errores</button>
+    <div class="errors-list">
+      <div class="error-item"><span class="error-num">1</span><span><strong>«include» entre Mini-juego y Desafío:</strong> Son CU independientes, no uno incluye al otro.</span></div>
+      <div class="error-item"><span class="error-num">2</span><span><strong>«extend» entre Publicar y Generar:</strong> Son acciones separadas e independientes del Creador.</span></div>
+      <div class="error-item"><span class="error-num">3</span><span><strong>Veedor con "Iniciar Sesión":</strong> No se menciona que inicien sesión; su único CU es "Expulsar Jugador".</span></div>
+      <div class="error-item"><span class="error-num">4</span><span><strong>Falta «include» de "Iniciar Sesión":</strong> Jugadores y creadores sí deben loguearse, falta modelarlo.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-procPractica">
+  <div class="section-header"><div class="section-icon">🏢</div><div><div class="section-title">Práctica de Procesos de Negocio</div><div class="section-sub">Leé el texto e identificá el tipo de proceso</div></div></div>
+  <div class="info-box tip"><span class="info-box-icon">💡</span><span><strong>Estratégico</strong>=dirección/largo plazo · <strong>Operativo</strong>=realiza el producto/servicio · <strong>Soporte</strong>=sostiene a los operativos</span></div>
+  <div style="height:12px"></div>
+  <div id="proc-container"></div>
+  <button class="btn-quiz-reset" onclick="resetProc()">↺ Reiniciar</button>
+</div>
+
+<div class="section" id="sec-flashcards">
+  <div class="section-header"><div class="section-icon">🃏</div><div><div class="section-title">Flashcards</div><div class="section-sub">Click para ver la respuesta</div></div></div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fc-progress" style="width:0%"></div></div>
+  <div class="fc-hint" id="fc-hint">Tarjeta 1 · click para girar</div>
+  <div class="flashcard-wrap">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="fc-face fc-front" id="fc-front">...</div>
+      <div class="fc-face fc-back" id="fc-back">...</div>
+    </div>
+  </div>
+  <div class="fc-nav">
+    <button class="fc-nav-btn" onclick="fcPrev()">← Anterior</button>
+    <span class="fc-counter" id="fc-counter">1 / N</span>
+    <button class="fc-nav-btn" onclick="fcNext()">Siguiente →</button>
+  </div>
+</div>
+
+</main>
+</div>
+<script>
+function setTheme(v){document.body.classList.toggle('light',v==='light');localStorage.setItem('asi-theme',v);}
+(function(){const s=localStorage.getItem('asi-theme')||'dark';document.querySelector('.theme-select').value=s;setTheme(s);})();
+function nav(el,id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function toggleAccord(el){el.classList.toggle('open');}
+function switchTab(btn,groupId,tabId){
+  const g=document.getElementById(groupId);
+  g.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+let totalAnswered=0,totalCorrect=0;
+function updateScore(){document.getElementById('globalScore').textContent=`✓ ${totalCorrect} / ${totalAnswered}`;}
+function toggleErrors(btn){
+  const list=btn.nextElementSibling;
+  list.classList.toggle('show');
+  btn.textContent=list.classList.contains('show')?'🙈 Ocultar errores':'👁 Ver los errores';
+}
+
+const vfData=[
+  {q:"La planificación o gestión del proyecto es una actividad que se lleva a cabo durante todo el Análisis, es decir desde el Reconocimiento hasta el Análisis de requisitos.",ans:false,just:"FALSO. La Gestión del Proyecto corre en paralelo desde el Reconocimiento hasta la Instalación, no solo durante el Análisis."},
+  {q:"El Ciclo de Vida cascada con prototipos es mejor que el de cascada ya que ayudamos al usuario a entender el comportamiento del sistema.",ans:true,just:"VERDADERO. El prototipo permite validar el comportamiento antes de que esté terminado. OJO: no es 'porque perdemos menos tiempo relevando'."},
+  {q:"El Product Owner es el responsable de maximizar el valor del producto.",ans:true,just:"VERDADERO. El PO prioriza el Backlog, elabora HU y da feedback diario."},
+  {q:"En Scrum, al final de cada Sprint se entregan todos los módulos del sistema.",ans:false,just:"FALSO. Se entrega un incremento funcional con valor, no todos los módulos."},
+  {q:"Si una tarea estimada en 5 días tardó 7, entonces se atrasará 2 días la fecha de fin del proyecto.",ans:false,just:"FALSO. Solo si la tarea está en el camino crítico (MT=0)."},
+  {q:"En un PERT el camino crítico identifica las tareas que no pueden retrasarse, por lo tanto no existe más de uno.",ans:false,just:"FALSO. Puede haber varios caminos críticos, todos con la misma duración."},
+  {q:"En un PERT siempre hay tareas críticas porque son las que permiten visualizar las dependencias.",ans:false,just:"FALSO. Las dependencias se ven en el grafo general. Las críticas son las que tienen MT=0."},
+  {q:"Los casos de uso no se pueden usar en metodología estructurada porque UML es solo para OO.",ans:false,just:"FALSO. Los CU son aplicables independientemente del paradigma de desarrollo."},
+  {q:"En el modelo espiral se van construyendo entregas parciales en cada ciclo con valor para el usuario.",ans:true,just:"VERDADERO. Cada iteración evalúa riesgos y construye incrementos con valor progresivo."},
+  {q:"Las fases de la gestión de procesos son 5, incluyendo 'Definir macroprocesos'.",ans:false,just:"FALSO. Son 4 fases. 'Definir macroprocesos' no es una fase separada."},
+  {q:"La entropía es un indicador del desgaste que el sistema presenta por el solo hecho de funcionar a lo largo del tiempo.",ans:true,just:"VERDADERO. Desgaste por el transcurso del tiempo o el funcionamiento."},
+  {q:"El informe de Reconocimiento es una herramienta de documentación de información.",ans:false,just:"FALSO. Es de DOCUMENTACIÓN de la etapa, no de obtención."},
+  {q:"Los problemas del informe de reconocimiento deben relacionarse con el objetivo de la empresa.",ans:false,just:"FALSO. Deben relacionarse con el OBJETIVO DE MANDATO."},
+  {q:"La etapa donde se revisan circuitos y procedimientos administrativos actuales es el Reconocimiento.",ans:false,just:"FALSO. Esa etapa es el RELEVAMIENTO."},
+  {q:"El CPM es un método determinístico.",ans:true,just:"VERDADERO. PERT usa estimaciones probabilísticas."},
+  {q:"Con Gantt puedo determinar duración, calendarizar y ver tareas en paralelo.",ans:true,just:"VERDADERO. No puede mostrar dependencias entre tareas."},
+  {q:"El Sponsor es la persona que empuja y financia el proyecto.",ans:true,just:"VERDADERO. El Stakeholder solo es interesado, no necesariamente financia."},
+  {q:"El Stakeholder es la persona que empuja y financia el proyecto.",ans:false,just:"FALSO. Eso es el SPONSOR."},
+  {q:"Las entrevistas con preguntas cerradas son las más recomendables para el Reconocimiento.",ans:false,just:"FALSO. En Reconocimiento se usan preguntas ABIERTAS."},
+  {q:"Un macroproceso posee actividades concretas asignadas a áreas específicas.",ans:false,just:"FALSO. El macroproceso NO posee actividades propias, solo agrupa procesos."},
+  {q:"La relación «include» en casos de uso modela un comportamiento opcional.",ans:false,just:"FALSO. «include» es OBLIGATORIO. El opcional es «extend»."},
+  {q:"En la Conversación de una HU, el Product Owner pregunta y el analista responde.",ans:false,just:"FALSO. El ANALISTA pregunta y el PO/usuario responde."},
+  {q:"Las Historias de Usuario deben cumplir el criterio INVEST para estar bien definidas.",ans:true,just:"VERDADERO. Independent, Negotiable, Valuable, Estimable, Small, Testable."},
+  {q:"Una tarea ficticia puede formar parte del camino crítico.",ans:true,just:"VERDADERO. Aunque no consuma tiempo ni recursos, puede estar en la secuencia que determina la duración mínima."},
+];
+let vfAnswered={};
+function renderVF(){
+  const c=document.getElementById('vf-container');c.innerHTML='';
+  vfData.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='vf-question';
+    d.innerHTML=`<div class="quiz-num">Pregunta ${i+1} de ${vfData.length}</div><div class="vf-text">${item.q}</div><div class="vf-btns"><button class="vf-btn vf-v" onclick="answerVF(${i},true,this)">✓ Verdadero</button><button class="vf-btn vf-f" onclick="answerVF(${i},false,this)">✗ Falso</button></div><div class="vf-result" id="vf-res-${i}"></div>`;
+    c.appendChild(d);
+  });
+}
+function answerVF(i,answer,btn){
+  if(vfAnswered[i])return;vfAnswered[i]=true;
+  const item=vfData[i];const correct=answer===item.ans;
+  if(correct)totalCorrect++;totalAnswered++;updateScore();
+  const res=document.getElementById(`vf-res-${i}`);
+  res.className=`vf-result show ${correct?'ok':'fail'}`;
+  res.innerHTML=`<strong>${correct?'✓ Correcto':'✗ Incorrecto'}</strong> — ${item.just}`;
+  btn.parentElement.querySelectorAll('.vf-btn').forEach(b=>b.disabled=true);
+}
+function resetVF(){vfAnswered={};renderVF();}
+
+const mcData=[
+  {q:"El Intervalo de Flotamiento (IF) representa...",opts:["El tiempo total que puede durar un proyecto.","La demora admitida en el comienzo de un nodo sin afectar la fecha de terminación del proyecto.","El margen libre de una tarea específica.","La diferencia entre CPM y PERT."],ans:1,just:"IF = FTa(i) − FTe(i). Es el margen del NODO."},
+  {q:"Si calculamos FTe(j) − FTe(i) − t(ij), estamos calculando...",opts:["El Margen Total","El Intervalo de Flotamiento","El Margen Libre","La Fecha Tardía"],ans:2,just:"ML = FTe(j) − FTe(i) − t(ij)."},
+  {q:"¿Cuál es la diferencia entre CPM y PERT?",opts:["CPM usa grafos y PERT barras de Gantt.","PERT es determinístico y CPM probabilístico.","La forma en que se calcula la duración de las tareas.","CPM no puede tener camino crítico."],ans:2,just:"CPM=duraciones fijas. PERT=3 estimaciones."},
+  {q:"Para visualizar en un único gráfico la superposición de tareas debo usar...",opts:["PERT","CPM","Diagrama de Gantt","Árbol de decisiones"],ans:2,just:"El Gantt muestra tareas en paralelo y su solapamiento."},
+  {q:"¿Cuántos caminos críticos puede tener un proyecto PERT?",opts:["Exactamente uno","Ninguno si todas las tareas tienen margen","Puede haber varios, todos de la misma duración","Ilimitados"],ans:2,just:"Pueden existir varios, todos de la misma longitud."},
+  {q:"¿Qué ciclo de vida es más adecuado con requerimientos muy inestables y poca experiencia del equipo?",opts:["Cascada","Prototipo","Espiral","Iterativo simple"],ans:2,just:"El Espiral se aplica con poca experiencia y reqs inestables."},
+  {q:"Los problemas y necesidades del informe de Reconocimiento deben relacionarse con...",opts:["El objetivo general de la empresa","El objetivo de mandato","Las funciones de IT","Los stakeholders externos"],ans:1,just:"Deben relacionarse con el OBJETIVO DE MANDATO."},
+  {q:"¿Qué rol de Scrum maximiza el valor del producto?",opts:["Scrum Master","Development Team","Product Owner","Sponsor"],ans:2,just:"El PO maximiza el valor, prioriza el backlog."},
+  {q:"La relación «extend» en casos de uso modela...",opts:["Comportamiento obligatorio","Comportamiento opcional bajo condición","Herencia entre actores","Inclusión de todos los escenarios"],ans:1,just:"Extend es comportamiento OPCIONAL."},
+  {q:"¿Cuántas fases tiene la Gestión por Procesos?",opts:["3","4","5","6"],ans:1,just:"4 fases: declaraciones, macroprocesos, procesos, detalle."},
+  {q:"¿Qué preguntas se recomiendan en las primeras entrevistas de Reconocimiento?",opts:["Cerradas","Abiertas","Opción múltiple","Dicotómicas"],ans:1,just:"Abiertas: exploración libre e información espontánea."},
+  {q:"Una tarea está en el camino crítico SOLO si...",opts:["Está entre dos nodos críticos","Tiene Margen Total = 0","Tiene la mayor duración","Está al inicio del grafo"],ans:1,just:"MT=0 Y entre nodos críticos."},
+  {q:"¿Qué hace el Scrum Master?",opts:["Prioriza el backlog","Es el equipo autogestionado","Asegura el proceso y elimina obstáculos","Representa al cliente"],ans:2,just:"Asegura el proceso y elimina obstáculos."},
+  {q:"El formato de una Historia de Usuario es...",opts:["Sistema debe permitir que...","Como [rol], quiero [funcionalidad], para [beneficio]","El usuario necesita [funcionalidad] en [tiempo]","Dado, cuando, entonces"],ans:1,just:"Como [rol] quiero [funcionalidad] para [beneficio]."},
+  {q:"¿Cuándo conviene usar Cascada?",opts:["Reqs inestables","Feedback frecuente necesario","Reqs claros, equipo experimentado, sin necesidad de ver el producto antes","Dominio desconocido"],ans:2,just:"Reqs fijos, equipo experto, cliente no necesita ver el sistema antes."},
+  {q:"Al calcular FTe con varios predecesores, se elige...",opts:["El menor valor","El mayor valor","La suma de valores","El promedio"],ans:1,just:"Siempre el MAYOR, para garantizar que todas las predecesoras terminaron."},
+  {q:"¿Cuál es el MT de una tarea crítica?",opts:["Igual a su duración","Igual al IF anterior","0 (cero)","Negativo"],ans:2,just:"Las críticas tienen MT=0."},
+  {q:"En la estructura 'Embudo' de entrevista, las preguntas van de...",opts:["Cerradas a abiertas","Abiertas a cerradas","Solo cerradas","Solo abiertas"],ans:1,just:"Embudo: abiertas → cerradas."},
+  {q:"¿Qué es un macroproceso?",opts:["Un proceso con actividades propias","Una agrupación de procesos sin actividades propias","El proceso más importante","Un proceso estratégico"],ans:1,just:"No tiene actividades propias, solo agrupa procesos."},
+  {q:"Las Historias de Usuario están en qué nivel de la jerarquía ágil?",opts:["Iniciativa","Épica","Feature","Unidad mínima de valor"],ans:3,just:"Iniciativa → Épica → Feature → Historia de Usuario."},
+  {q:"En PERT-CPM las tareas ficticias...",opts:["Consumen tiempo no recursos","Consumen recursos no tiempo","No consumen tiempo ni recursos","Solo se usan al inicio"],ans:2,just:"Duración=0, sin recursos, flecha punteada."},
+  {q:"¿En qué etapa el cliente DEBE concordar con el profesional para sustentar las alternativas?",opts:["Reconocimiento","Relevamiento","Diagnóstico","Análisis de Requisitos"],ans:2,just:"En el Diagnóstico el cliente debe concordar."},
+  {q:"¿Qué tipo de proceso es la 'Gestión de RRHH'?",opts:["Estratégico","Operativo","De Apoyo/Soporte","Táctico"],ans:2,just:"Es de Apoyo/Soporte: soporte transversal."},
+  {q:"Un mismo usuario puede interpretar distintos roles en un sistema de CU.",opts:["Solo si es actor primario","Solo si es secundario","Verdadero, y un rol puede ser interpretado por más de un usuario","Falso, cada usuario tiene un único rol"],ans:2,just:"Los CU se definen por ROL, no por persona."},
+  {q:"¿Qué describe un requerimiento No Funcional de Calidad?",opts:["Qué debe hacer el sistema","Mantenibilidad, usabilidad, performance, disponibilidad, seguridad","Restricciones de interfaz con otros sistemas","El flujo principal de un caso de uso"],ans:1,just:"Calidad: mantenibilidad, usabilidad, performance, disponibilidad, seguridad."},
+];
+let mcAnswered={};
+function renderMC(){
+  const c=document.getElementById('mc-container');c.innerHTML='';
+  mcData.forEach((item,qi)=>{
+    const d=document.createElement('div');d.className='quiz-question';
+    let optsHTML=item.opts.map((o,oi)=>`<div class="quiz-opt" id="mc-opt-${qi}-${oi}" onclick="answerMC(${qi},${oi})"><span class="quiz-letter">${String.fromCharCode(65+oi)}</span>${o}</div>`).join('');
+    d.innerHTML=`<div class="quiz-num">Pregunta ${qi+1} de ${mcData.length}</div><div class="quiz-q-text">${item.q}</div><div class="quiz-options">${optsHTML}</div><div class="quiz-feedback" id="mc-fb-${qi}"></div>`;
+    c.appendChild(d);
+  });
+}
+function answerMC(qi,oi){
+  if(mcAnswered[qi])return;mcAnswered[qi]=true;
+  const item=mcData[qi];const correct=oi===item.ans;
+  if(correct)totalCorrect++;totalAnswered++;updateScore();
+  item.opts.forEach((_,i)=>{const el=document.getElementById(`mc-opt-${qi}-${i}`);el.classList.add('disabled');if(i===item.ans)el.classList.add('reveal-correct');});
+  const chosen=document.getElementById(`mc-opt-${qi}-${oi}`);
+  chosen.classList.remove('reveal-correct');chosen.classList.add(correct?'selected-correct':'selected-wrong');
+  const fb=document.getElementById(`mc-fb-${qi}`);
+  fb.className=`quiz-feedback visible ${correct?'ok':'fail'}`;
+  fb.innerHTML=`<strong>${correct?'✓ Correcto':'✗ Incorrecto'}</strong> — ${item.just}`;
+}
+function resetMC(){mcAnswered={};renderMC();}
+
+const procData=[
+  {text:"La Dirección Estratégica de VIDA SALUD define anualmente los objetivos institucionales a través de la Planificación Estratégica, analizando indicadores clave y proponiendo mejoras continuas.",q:"¿Qué tipo de proceso es la Planificación Estratégica?",opts:["Operativo","De Apoyo/Soporte","Estratégico","Táctico"],ans:2,just:"ESTRATÉGICO: vinculado a la dirección y al largo plazo."},
+  {text:"El área de Atención al Paciente recibe pacientes que solicitan turno presencial o telefónicamente. Las recepcionistas verifican disponibilidad y registran nombre, horario y profesional.",q:"¿Qué tipo de proceso es la Gestión de Turnos?",opts:["Estratégico","Operativo","De Apoyo/Soporte","Directivo"],ans:1,just:"OPERATIVO: ligado directamente a la realización del servicio."},
+  {text:"El Área de IT mantiene el sistema de turnos, gestiona la infraestructura tecnológica y da soporte a todas las áreas de la organización.",q:"¿Qué tipo de proceso es la Gestión de IT?",opts:["Operativo","Estratégico","De Apoyo/Soporte","Misional"],ans:2,just:"APOYO/SOPORTE: da soporte a los procesos operativos."},
+  {text:"La Gestión Médica supervisa la organización diaria de actividades médicas, disponibilidad de profesionales y recursos físicos.",q:"¿Qué tipo de proceso es la Gestión Médica?",opts:["Estratégico","De Apoyo/Soporte","Operativo","Táctico"],ans:2,just:"OPERATIVO: organiza el servicio médico, core del negocio."},
+  {text:"El proceso de Control de Calidad garantiza que la atención médica y procesos administrativos se realicen de forma segura y eficiente.",q:"¿Qué tipo de proceso es el Control de Calidad?",opts:["Operativo","Estratégico","De Apoyo/Soporte","Misional"],ans:2,just:"APOYO/SOPORTE: garantiza calidad de los operativos sin ejecutarlos."},
+  {text:"La Gestión de Modernización analiza soluciones tecnológicas innovadoras alineadas con la visión de ser la red de clínicas modelo.",q:"¿Qué tipo de proceso es la Gestión de Modernización?",opts:["Operativo","De Apoyo/Soporte","Estratégico","Administrativo"],ans:2,just:"ESTRATÉGICO: analiza soluciones a largo plazo alineadas a la visión."},
+  {text:"El área de Diagnóstico por Imágenes realiza radiografías, ecografías y análisis clínicos, coordinando derivaciones con consultorios.",q:"¿Qué tipo de proceso es Diagnóstico por Imágenes?",opts:["Estratégico","De Apoyo/Soporte","Operativo","Directivo"],ans:2,just:"OPERATIVO: realiza directamente el servicio de salud."},
+  {text:"El área de RRHH gestiona contrataciones, evaluaciones de desempeño, capacitación y cumplimiento de normativas laborales.",q:"¿Qué tipo de proceso es la Gestión de RRHH?",opts:["Operativo","Estratégico","De Apoyo/Soporte","Misional"],ans:2,just:"APOYO/SOPORTE: soporte transversal a toda la organización."},
+  {text:"Identificar los grandes bloques funcionales que agrupan procesos relacionados, como 'Gestión Financiera' o 'Gestión de RRHH'.",q:"¿A qué fase de la gestión por procesos corresponde?",opts:["Identificar declaraciones","Identificar macroprocesos","Identificar procesos","Detallar procesos"],ans:1,just:"Fase 2: IDENTIFICAR LOS MACROPROCESOS."},
+  {text:"El área de Emergencias atiende casos urgentes y espontáneos las 24 horas, con un flujo de atención distinto al de turnos programados.",q:"¿Qué tipo de proceso es la Guardia de Emergencias?",opts:["Estratégico","Operativo","De Apoyo/Soporte","Táctico"],ans:1,just:"OPERATIVO: atiende directamente al paciente, parte central del servicio."},
+];
+let procAnswered={};
+function renderProc(){
+  const c=document.getElementById('proc-container');c.innerHTML='';
+  procData.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='proc-exercise';
+    let optsHTML=item.opts.map((o,oi)=>`<div class="proc-opt" id="proc-opt-${i}-${oi}" onclick="answerProc(${i},${oi})">${o}</div>`).join('');
+    d.innerHTML=`<div class="quiz-num">Ejercicio ${i+1} de ${procData.length}</div><div style="font-size:14px;font-weight:600;margin-bottom:8px">${item.q}</div><div class="proc-text">${item.text}</div><div class="proc-options">${optsHTML}</div><div class="proc-fb" id="proc-fb-${i}"></div>`;
+    c.appendChild(d);
+  });
+}
+function answerProc(i,oi){
+  if(procAnswered[i])return;procAnswered[i]=true;
+  const item=procData[i];const correct=oi===item.ans;
+  if(correct)totalCorrect++;totalAnswered++;updateScore();
+  item.opts.forEach((_,j)=>{const el=document.getElementById(`proc-opt-${i}-${j}`);el.classList.add('disabled');if(j===item.ans)el.classList.add('correct');});
+  if(!correct){document.getElementById(`proc-opt-${i}-${oi}`).classList.add('wrong');}
+  const fb=document.getElementById(`proc-fb-${i}`);
+  fb.className=`proc-fb show ${correct?'ok':'fail'}`;
+  fb.innerHTML=`<strong>${correct?'✓ Correcto':'✗ Incorrecto'}</strong> — ${item.just}`;
+}
+function resetProc(){procAnswered={};renderProc();}
+
+const fcData=[
+  {q:"¿Qué es la Entropía?",a:"Desgaste del sistema por el transcurso del tiempo o su funcionamiento."},
+  {q:"¿Qué diferencia hay entre Dato e Información?",a:"Dato es objetivo. Información es subjetiva (dato + conocimiento en contexto, según el receptor)."},
+  {q:"¿Qué calcula IF = FTa(i) − FTe(i)?",a:"El Intervalo de Flotamiento del NODO i."},
+  {q:"¿Cuándo tiene MT = 0 una tarea?",a:"Cuando es CRÍTICA. Cualquier retraso retrasa todo el proyecto."},
+  {q:"¿Cuál es el orden de la metodología ASI?",a:"Reconocimiento → Relevamiento → Diagnóstico → Factibilidad → Análisis de Req → Diseño → Desarrollo → Pruebas → Instalación → Mantenimiento → Sustitución"},
+  {q:"¿Cuántos caminos críticos puede haber en PERT?",a:"Varios, pero todos con la misma duración total."},
+  {q:"¿Qué diferencia Include de Extend en CU?",a:"Include: obligatorio (siempre ocurre). Extend: opcional (bajo condición)."},
+  {q:"¿Para qué sirve Gantt y qué NO puede hacer?",a:"Sirve para calendarizar y ver solapamiento. NO muestra dependencias (eso lo hace PERT/CPM)."},
+  {q:"¿Cuántas fases tiene la Gestión por Procesos?",a:"4: Identificar declaraciones, macroprocesos, procesos, detallar procesos."},
+  {q:"¿Qué es el Sponsor?",a:"Quien EMPUJA y FINANCIA el proyecto. Distinto de Stakeholder."},
+  {q:"¿Cuándo usar el ciclo de vida Espiral?",a:"Dominio desconocido, poca experiencia, reqs inestables, alto riesgo de fracaso."},
+  {q:"¿Qué es el Margen Libre (ML)?",a:"ML=FTe(j)−FTe(i)−t(ij). Demora sin afectar el comienzo de las siguientes tareas."},
+  {q:"¿Cuál es el formato de una Historia de Usuario?",a:"Como [rol], quiero [funcionalidad], para [beneficio]. 3C: Card, Conversation, Confirmation."},
+  {q:"¿En qué etapa se revisan circuitos y procedimientos administrativos?",a:"En el RELEVAMIENTO, no en el Reconocimiento."},
+  {q:"CPM vs PERT: ¿en qué se diferencian?",a:"CPM=determinístico. PERT=probabilístico (3 estimaciones)."},
+  {q:"Criterio INVEST",a:"Independent, Negotiable, Valuable, Estimable, Small, Testable."},
+  {q:"¿Qué es la Homeostasis?",a:"Adaptación permanente del sistema al contexto. Supervivencia dinámica."},
+  {q:"¿Qué se entrega al final de cada Sprint?",a:"Un INCREMENTO funcional con valor, no todos los módulos."},
+  {q:"Error PERT: dos tareas con mismo nodo origen y destino",a:"Se resuelve con una TAREA FICTICIA, agregando un nodo intermedio."},
+  {q:"¿Qué hace el Diagnóstico en la metodología?",a:"Determina las CAUSAS de los problemas. El cliente DEBE concordar."},
+  {q:"Tipos de observación según participación",a:"No participante (neutral) o Participante (se integra al grupo)."},
+  {q:"Estructuras de entrevista",a:"Embudo (abiertas→cerradas), Pirámide (cerradas→abiertas), Rombo (cerradas→abiertas→cerradas)."},
+  {q:"¿Qué tipo de proceso es 'Gestión de RRHH'?",a:"De APOYO/SOPORTE: soporte transversal."},
+  {q:"¿Qué es un Macroproceso?",a:"Agrupación de procesos con objetivo común, sin actividades propias."},
+  {q:"Error común al calcular FTe con varios predecesores",a:"Elegir el MAYOR valor, no el menor. En FTa se elige el menor."},
+];
+let fcIndex=0,fcFlipped=false;
+function renderFC(){
+  const card=document.getElementById('flashcard');
+  card.classList.remove('flipped');fcFlipped=false;
+  document.getElementById('fc-front').textContent=fcData[fcIndex].q;
+  document.getElementById('fc-back').textContent=fcData[fcIndex].a;
+  document.getElementById('fc-counter').textContent=`${fcIndex+1} / ${fcData.length}`;
+  document.getElementById('fc-hint').textContent=`Tarjeta ${fcIndex+1} de ${fcData.length} · click para ver la respuesta`;
+  document.getElementById('fc-progress').style.width=((fcIndex+1)/fcData.length*100).toFixed(0)+'%';
+}
+function flipCard(){fcFlipped=!fcFlipped;document.getElementById('flashcard').classList.toggle('flipped',fcFlipped);document.getElementById('fc-hint').textContent=fcFlipped?'Click de nuevo para girar':'Tarjeta '+(fcIndex+1)+' de '+fcData.length+' · click para ver la respuesta';}
+function fcNext(){fcIndex=(fcIndex+1)%fcData.length;renderFC();}
+function fcPrev(){fcIndex=(fcIndex-1+fcData.length)%fcData.length;renderFC();}
+
+renderVF();renderMC();renderProc();renderFC();updateScore();
+</script>
+</body>
+</html>
