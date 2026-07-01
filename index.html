@@ -143,13 +143,32 @@
   .proc-fb.show{display:block;}
   .proc-fb.ok{background:var(--correct);border:1px solid var(--correct-border);}
   .proc-fb.fail{background:var(--wrong);border:1px solid var(--wrong-border);}
-  @media(max-width:700px){.theory-grid,.two-col{grid-template-columns:1fr;}main{padding:20px 16px;}.sidebar{display:none;}}
+  /* ── MOBILE NAV ── */
+  .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px;}
+  .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .2s;}
+  .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;}
+  .mobile-overlay.show{display:block;}
+  @media(max-width:700px){
+    .hamburger{display:flex;}
+    .theory-grid,.two-col{grid-template-columns:1fr;}
+    main{padding:20px 16px;}
+    .sidebar{
+      position:fixed;left:-260px;top:54px;height:calc(100vh - 54px);
+      width:240px;z-index:200;transition:left .25s cubic-bezier(.4,0,.2,1);
+      box-shadow:4px 0 20px rgba(0,0,0,.3);
+    }
+    .sidebar.open{left:0;}
+  }
 </style>
 </head>
 <body>
 
+<div class="mobile-overlay" id="overlay" onclick="closeSidebar()"></div>
 <div class="topbar">
   <div class="topbar-left">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
     <div class="logo">ASI<span>.study</span></div>
   </div>
   <div class="topbar-right">
@@ -176,6 +195,7 @@
   <div class="sidebar-item" onclick="nav(this,'casosuso')"><span class="sidebar-icon">👤</span> Casos de Uso</div>
   <div class="sidebar-item" onclick="nav(this,'procesos')"><span class="sidebar-icon">⚙️</span> Proc. de Negocio</div>
   <div class="sidebar-section">Práctica</div>
+  <div class="sidebar-item" onclick="nav(this,'conceptos')"><span class="sidebar-icon">🧠</span> Conceptos Básicos</div>
   <div class="sidebar-item" onclick="nav(this,'vfquiz')"><span class="sidebar-icon">✅</span> Quiz V/F</div>
   <div class="sidebar-item" onclick="nav(this,'multiplechoice')"><span class="sidebar-icon">🎯</span> Multiple Choice</div>
   <div class="sidebar-item" onclick="nav(this,'erroresCU')"><span class="sidebar-icon">🐛</span> Errores en CU</div>
@@ -587,6 +607,13 @@
   </div>
 </div>
 
+<div class="section" id="sec-conceptos">
+  <div class="section-header"><div class="section-icon">🧠</div><div><div class="section-title">Conceptos Básicos</div><div class="section-sub">Definiciones clave · 3 opciones · Con justificación</div></div></div>
+  <button class="btn-quiz-reset" onclick="resetConceptos()">↺ Reiniciar</button>
+  <div style="height:12px"></div>
+  <div id="conceptos-container"></div>
+</div>
+
 <div class="section" id="sec-vfquiz">
   <div class="section-header"><div class="section-icon">✅</div><div><div class="section-title">Quiz Verdadero / Falso</div><div class="section-sub">Preguntas reales de parciales</div></div></div>
   <button class="btn-quiz-reset" onclick="resetVF()">↺ Reiniciar Quiz</button>
@@ -678,6 +705,7 @@ function nav(el,id){
   document.getElementById('sec-'+id).classList.add('active');
   el.classList.add('active');
   window.scrollTo(0,0);
+  closeSidebar();
 }
 function toggleAccord(el){el.classList.toggle('open');}
 function switchTab(btn,groupId,tabId){
@@ -703,7 +731,7 @@ const vfData=[
   {q:"Si una tarea estimada en 5 días tardó 7, entonces se atrasará 2 días la fecha de fin del proyecto.",ans:false,just:"FALSO. Solo si la tarea está en el camino crítico (MT=0)."},
   {q:"En un PERT el camino crítico identifica las tareas que no pueden retrasarse, por lo tanto no existe más de uno.",ans:false,just:"FALSO. Puede haber varios caminos críticos, todos con la misma duración."},
   {q:"En un PERT siempre hay tareas críticas porque son las que permiten visualizar las dependencias.",ans:false,just:"FALSO. Las dependencias se ven en el grafo general. Las críticas son las que tienen MT=0."},
-  {q:"Los casos de uso no se pueden usar en metodología estructurada porque UML es solo para OO.",ans:false,just:"FALSO. Los CU son aplicables independientemente del paradigma de desarrollo."},
+  {q:"Ingeniería de Software es el concepto que hace referencia a que todo sistema contiene sistemas de menor jerarquía y a su vez es parte de un sistema de jerarquía mayor que lo contiene.",ans:false,just:"FALSO. El concepto al cual se hace referencia es Jerarquía Sistémica, donde siempre habrá sistemas con subsistemas en su interior y que a su vez este podría pertenecer a un sistema que lo englobe."},
   {q:"En el modelo espiral se van construyendo entregas parciales en cada ciclo con valor para el usuario.",ans:true,just:"VERDADERO. Cada iteración evalúa riesgos y construye incrementos con valor progresivo."},
   {q:"Las fases de la gestión de procesos son 5, incluyendo 'Definir macroprocesos'.",ans:false,just:"FALSO. Son 4 fases. 'Definir macroprocesos' no es una fase separada."},
   {q:"La entropía es un indicador del desgaste que el sistema presenta por el solo hecho de funcionar a lo largo del tiempo.",ans:true,just:"VERDADERO. Desgaste por el transcurso del tiempo o el funcionamiento."},
@@ -713,7 +741,7 @@ const vfData=[
   {q:"El CPM es un método determinístico.",ans:true,just:"VERDADERO. PERT usa estimaciones probabilísticas."},
   {q:"Con Gantt puedo determinar duración, calendarizar y ver tareas en paralelo.",ans:true,just:"VERDADERO. No puede mostrar dependencias entre tareas."},
   {q:"El Sponsor es la persona que empuja y financia el proyecto.",ans:true,just:"VERDADERO. El Stakeholder solo es interesado, no necesariamente financia."},
-  {q:"El Stakeholder es la persona que empuja y financia el proyecto.",ans:false,just:"FALSO. Eso es el SPONSOR."},
+  {q:"Es fundamental que en el Diagnóstico el cliente esté de acuerdo con el profesional de Sistemas respecto al análisis realizado.",ans:true,just:"VERDADERO. Es fundamental porque en esta etapa se proponen las posibles soluciones, y tienen que estar de acuerdo ya que las mismas tienen que tener un sustento válido con respecto a las causas del/los problema/s."},
   {q:"Las entrevistas con preguntas cerradas son las más recomendables para el Reconocimiento.",ans:false,just:"FALSO. En Reconocimiento se usan preguntas ABIERTAS."},
   {q:"Un macroproceso posee actividades concretas asignadas a áreas específicas.",ans:false,just:"FALSO. El macroproceso NO posee actividades propias, solo agrupa procesos."},
   {q:"La relación «include» en casos de uso modela un comportamiento opcional.",ans:false,just:"FALSO. «include» es OBLIGATORIO. El opcional es «extend»."},
@@ -866,7 +894,62 @@ function flipCard(){fcFlipped=!fcFlipped;document.getElementById('flashcard').cl
 function fcNext(){fcIndex=(fcIndex+1)%fcData.length;renderFC();}
 function fcPrev(){fcIndex=(fcIndex-1+fcData.length)%fcData.length;renderFC();}
 
-renderVF();renderMC();renderProc();renderFC();updateScore();
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+const conceptosData=[
+  {q:"¿Qué es la Entropía?",opts:["La capacidad del sistema de adaptarse al contexto para sobrevivir.","El desgaste del sistema por el transcurso del tiempo o su funcionamiento.","La propiedad del sistema de interactuar con el medio ambiente."],ans:1,just:"La entropía es el desgaste que presenta el sistema por el transcurso del tiempo o su funcionamiento. Los sistemas altamente entrópicos tienden a desaparecer."},
+  {q:"¿Qué es la Homeostasis?",opts:["La destrucción gradual de un sistema por causas externas.","El nivel de adaptación permanente del sistema al contexto, orientado a su supervivencia dinámica.","La capacidad de un sistema de reemplazarse a sí mismo automáticamente."],ans:1,just:"Homeostasis es el nivel de adaptación y la tendencia a la supervivencia dinámica del sistema frente a los cambios del contexto."},
+  {q:"¿Qué es la Sinergia?",opts:["La separación de un sistema en partes independientes.","El fenómeno por el cual el todo es mayor que la suma de sus partes.","La duplicación de relaciones para mayor redundancia."],ans:1,just:"Sinergia: el todo es mayor que la suma de sus partes. La cooperación entre los subsistemas genera un resultado mayor al individual."},
+  {q:"¿Qué es la Permeabilidad de un sistema?",opts:["La velocidad con la que el sistema procesa información.","La medida de la interacción del sistema con su medio. Alta permeabilidad = sistema abierto.","La capacidad del sistema de copiar estructuras de otros sistemas."],ans:1,just:"La permeabilidad mide cuánto interactúa el sistema con su entorno. Alta permeabilidad indica un sistema abierto; casi nula indica uno cerrado."},
+  {q:"¿Qué es la Jerarquía Sistémica?",opts:["El ranking de importancia de los subsistemas de una organización.","El concepto que indica que todo sistema tiene subsistemas en su interior y a su vez puede pertenecer a un sistema mayor.","El orden de creación de los distintos sistemas a lo largo del tiempo."],ans:1,just:"Jerarquía Sistémica: todo sistema contiene subsistemas de menor jerarquía y a la vez puede ser parte de un macrosistema que lo engloba."},
+  {q:"¿Cuál es la diferencia entre un Dato y la Información?",opts:["El dato es subjetivo y la información es objetiva.","El dato es una medición objetiva de la realidad; la información es el dato interpretado en contexto, subjetiva según el receptor.","Son sinónimos, ambos representan hechos de la realidad."],ans:1,just:"Dato: medición objetiva. Información: dato + conocimiento en contexto, subjetiva según quien la recibe y la necesita."},
+  {q:"¿Qué es una relación Simbiótica entre subsistemas?",opts:["Una relación donde los sistemas mejoran su desempeño al cooperar.","Una relación donde los sistemas conectados no pueden funcionar de forma independiente.","Una relación redundante que duplica otras relaciones."],ans:1,just:"Simbiótica: los subsistemas conectados no pueden funcionar solos. Son totalmente dependientes entre sí."},
+  {q:"¿Qué es una relación Superflua entre subsistemas?",opts:["Una relación innecesaria que degrada el sistema.","Una relación que repite a otras existentes, aumentando la probabilidad de funcionamiento continuo.","Una relación nueva que reemplaza a las anteriores."],ans:1,just:"Superflua: repite otras relaciones. No agrega nueva funcionalidad pero aumenta la probabilidad de que el sistema funcione todo el tiempo (redundancia)."},
+  {q:"¿Qué es una Caja Negra en el contexto de sistemas?",opts:["Un proceso cuyo funcionamiento interno es conocido y diseñado por el analista.","Un proceso desconocido o complejo del que solo se conocen las entradas y salidas.","Un sistema que no tiene ninguna salida visible."],ans:1,just:"Caja Negra: proceso cuyo funcionamiento interno es desconocido o muy complejo. Solo se conocen las entradas y las salidas."},
+  {q:"¿Qué es la Adaptabilidad de un sistema?",opts:["La capacidad del sistema de eliminar sus subsistemas cuando ya no son útiles.","La propiedad del sistema de aprender y modificar su estructura/procesos según los cambios del contexto.","La velocidad de respuesta del sistema ante estímulos externos."],ans:1,just:"Adaptabilidad: el sistema aprende y modifica su comportamiento y estructura frente a los cambios del contexto."},
+  {q:"¿En qué etapa de la metodología se determina la causa de los problemas y se proponen alternativas de solución?",opts:["Reconocimiento","Relevamiento","Diagnóstico"],ans:2,just:"En el Diagnóstico se determinan las causas de los problemas y se presentan alternativas de solución. El cliente debe concordar."},
+  {q:"¿Qué técnica de obtención se recomienda cuando hay muchos encuestados dispersos geográficamente?",opts:["Entrevista","Cuestionario","Observación"],ans:1,just:"El cuestionario es ideal para recolección masiva cuando las personas están ampliamente dispersas o son muchas."},
+  {q:"¿Cuál es la estructura de entrevista que va de preguntas abiertas a cerradas?",opts:["Pirámide","Embudo","Rombo"],ans:1,just:"Embudo: comienza con preguntas abiertas (exploración amplia) y cierra con preguntas cerradas (datos concretos)."},
+  {q:"¿Qué es el Sponsor de un proyecto?",opts:["El usuario final que va a utilizar el sistema.","La persona o área que empuja y financia el proyecto.","El analista responsable del relevamiento."],ans:1,just:"El Sponsor es quien impulsa y financia el proyecto. Es distinto del Stakeholder (interesado/afectado) y del usuario."},
+  {q:"¿Cuál es la diferencia principal entre CPM y PERT?",opts:["CPM usa diagramas de barras y PERT usa grafos.","La forma en que se calcula la duración de las tareas: CPM es determinístico, PERT es probabilístico.","PERT solo se usa para proyectos de software y CPM para construcción."],ans:1,just:"CPM=determinístico (duración fija). PERT=probabilístico (3 estimaciones: optimista, probable, pesimista)."},
+  {q:"¿Qué es el Margen Total (MT) de una tarea?",opts:["El tiempo total que dura la tarea desde su inicio hasta su fin.","El tiempo máximo que puede retrasarse la tarea sin afectar el plazo total del proyecto.","La diferencia entre la fecha temprana y la tardía del nodo de inicio."],ans:1,just:"MT=FTa(j)−FTe(i)−t(ij). Es el tiempo máximo de demora sin afectar el plazo total. Las tareas críticas tienen MT=0."},
+  {q:"¿Qué tipo de proceso es uno que está vinculado a la dirección y al largo plazo de la organización?",opts:["Operativo","Estratégico","De Apoyo/Soporte"],ans:1,just:"Estratégico: vinculado al ámbito de las responsabilidades de la dirección y orientado al largo plazo."},
+  {q:"¿Qué representa la relación «include» en un diagrama de Casos de Uso?",opts:["Un comportamiento opcional que ocurre solo bajo ciertas condiciones.","Un comportamiento obligatorio que siempre ocurre cuando se ejecuta el caso de uso base.","La herencia de comportamiento entre dos actores."],ans:1,just:"«include» modela comportamiento OBLIGATORIO. El CU incluido siempre se ejecuta cuando se ejecuta el CU que incluye."},
+  {q:"¿Qué letra de INVEST indica que una Historia de Usuario debe poder ser validada mediante pruebas?",opts:["V — Valuable","S — Small","T — Testable"],ans:2,just:"T=Testable (Testeable): la HU puede validarse mediante pruebas objetivas (criterios de aceptación)."},
+  {q:"¿Cuántas alternativas como máximo se evalúan en el Estudio de Factibilidad?",opts:["2 (mínima y máxima)","3 (mínima, intermedia y máxima)","5 (según criterios FTOPL)"],ans:1,just:"El Estudio de Factibilidad evalúa máximo 3 alternativas: mínima, intermedia y máxima."},
+];
+
+let conceptosAnswered={};
+function renderConceptos(){
+  const c=document.getElementById('conceptos-container');c.innerHTML='';
+  conceptosData.forEach((item,qi)=>{
+    const d=document.createElement('div');d.className='quiz-question';
+    let optsHTML=item.opts.map((o,oi)=>`<div class="quiz-opt" id="cb-opt-${qi}-${oi}" onclick="answerConceptos(${qi},${oi})"><span class="quiz-letter">${String.fromCharCode(65+oi)}</span>${o}</div>`).join('');
+    d.innerHTML=`<div class="quiz-num">Concepto ${qi+1} de ${conceptosData.length}</div><div class="quiz-q-text">${item.q}</div><div class="quiz-options">${optsHTML}</div><div class="quiz-feedback" id="cb-fb-${qi}"></div>`;
+    c.appendChild(d);
+  });
+}
+function answerConceptos(qi,oi){
+  if(conceptosAnswered[qi])return;conceptosAnswered[qi]=true;
+  const item=conceptosData[qi];const correct=oi===item.ans;
+  if(correct)totalCorrect++;totalAnswered++;updateScore();
+  item.opts.forEach((_,i)=>{const el=document.getElementById(`cb-opt-${qi}-${i}`);el.classList.add('disabled');if(i===item.ans)el.classList.add('reveal-correct');});
+  const chosen=document.getElementById(`cb-opt-${qi}-${oi}`);
+  chosen.classList.remove('reveal-correct');chosen.classList.add(correct?'selected-correct':'selected-wrong');
+  const fb=document.getElementById(`cb-fb-${qi}`);
+  fb.className=`quiz-feedback visible ${correct?'ok':'fail'}`;
+  fb.innerHTML=`<strong>${correct?'✓ Correcto':'✗ Incorrecto'}</strong> — ${item.just}`;
+}
+function resetConceptos(){conceptosAnswered={};renderConceptos();}
+
+renderVF();renderMC();renderProc();renderConceptos();renderFC();updateScore();
 </script>
 </body>
 </html>
